@@ -1,0 +1,64 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+build/
+out/
+.next/
+*.tsbuildinfo
+
+# Environment and secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+credentials.json
+secrets/
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+*.egg-info/
+.coverage
+htmlcov/
+
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfvars
+!*.tfvars.example
+.terraform.lock.hcl
+
+# Kubernetes / Helm (local overrides with secrets)
+kubeconfig
+*.kubeconfig
+**/values-local.yaml
+**/values-secrets.yaml
+
+# Docker
+.docker/
+
+# IDE (personal settings only; shared configs may be committed explicitly)
+.vscode/settings.json
+.vscode/launch.json
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Logs and temp
+*.log
+tmp/
+temp/
