@@ -1,0 +1,22 @@
+# Ephemeral AKS demo overrides. CI injects the full ACR image ref (tagged with the
+# git SHA) at deploy time, per cicd.md.
+
+apps:
+  cart-service:
+    image: REPLACED_BY_CI/cart-service:latest
+  checkout-service:
+    image: REPLACED_BY_CI/checkout-service:latest
+  inventory-service:
+    image: REPLACED_BY_CI/inventory-service:latest
+  storefront:
+    image: REPLACED_BY_CI/storefront:latest
+
+imagePullPolicy: IfNotPresent
+
+redis:
+  persistence: true
+  storage: 1Gi
+
+postgres:
+  storage: 8Gi
+  storageClass: managed-csi

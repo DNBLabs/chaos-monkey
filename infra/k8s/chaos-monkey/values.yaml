@@ -1,0 +1,61 @@
+# Shared defaults. Environment overrides live in values-kind.yaml / values-aks.yaml.
+
+namespace: chaos-monkey
+
+# Replica counts per deployment-topology.md. Inventory is driven by the HPA below.
+apps:
+  cart-service:
+    image: cart-service:local
+    replicas: 1
+    port: 8080
+    chaosTarget: false
+  checkout-service:
+    image: checkout-service:local
+    replicas: 1
+    port: 8080
+    chaosTarget: false
+  inventory-service:
+    image: inventory-service:local
+    replicas: 2
+    port: 8080
+    # Chaos Mesh experiments select on this label; cart and checkout are never targeted.
+    chaosTarget: true
+  storefront:
+    image: storefront:local
+    replicas: 1
+    port: 80
+    chaosTarget: false
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    cpu: 500m
+    memory: 256Mi
+
+# Inventory-only HPA. minReplicas 2 keeps a healthy peer alive through pod-kill chaos
+# (resilience.md) so Istio retries have somewhere to route.
+hpa:
+  inventory:
+    minReplicas: 2
+    maxReplicas: 4
+    targetCPUUtilizationPercentage: 60
+
+redis:
+  image: redis:7-alpine
+  # emptyDir is acceptable for cart sessions; PVC only on AKS (deployment-topology.md).
+  persistence: false
+  storage: 1Gi
+
+postgres:
+  image: postgres:16-alpine
+  database: inventory
+  user: inventory
+  # PVC required on both environments: catalog seed and Stock survive pod restarts.
+  storage: 1Gi
+  storageClass: ""
+
+istio:
+  enabled: true
+  gatewayHost: "*"

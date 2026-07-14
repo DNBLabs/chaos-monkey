@@ -1,0 +1,20 @@
+# Inventory is the only autoscaled workload — it is the chaos target and the one
+# service the demo drives under load. Cart, checkout, and storefront stay fixed.
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: inventory-service
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: inventory-service
+  minReplicas: {{ .Values.hpa.inventory.minReplicas }}
+  maxReplicas: {{ .Values.hpa.inventory.maxReplicas }}
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: {{ .Values.hpa.inventory.targetCPUUtilizationPercentage }}

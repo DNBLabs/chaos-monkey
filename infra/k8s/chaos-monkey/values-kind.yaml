@@ -1,0 +1,21 @@
+# Local kind overrides. Images are side-loaded with `kind load docker-image`,
+# so tags stay :local and are never pulled from a registry.
+
+apps:
+  cart-service:
+    image: cart-service:local
+  checkout-service:
+    image: checkout-service:local
+  inventory-service:
+    image: inventory-service:local
+  storefront:
+    image: storefront:local
+
+imagePullPolicy: Never
+
+redis:
+  persistence: false
+
+postgres:
+  storage: 1Gi
+  storageClass: standard

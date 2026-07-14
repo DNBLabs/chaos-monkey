@@ -1,0 +1,6 @@
+apiVersion: v2
+name: chaos-monkey
+description: Application workloads for the chaos-monkey e-commerce sandbox
+type: application
+version: 0.1.0
+appVersion: "0.1.0"
