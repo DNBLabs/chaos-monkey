@@ -1,0 +1,66 @@
+{{- if .Values.istio.enabled }}
+apiVersion: networking.istio.io/v1
+kind: Gateway
+metadata:
+  name: chaos-monkey
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+    - port:
+        number: 80
+        name: http
+        protocol: HTTP
+      hosts:
+        - {{ .Values.istio.gatewayHost | quote }}
+---
+# Path-based routing per deployment-topology.md. Note there is no route for
+# /api/v1/internal/* — reservation commit/release stays mesh-only and is never
+# reachable from the ingress gateway.
+apiVersion: networking.istio.io/v1
+kind: VirtualService
+metadata:
+  name: chaos-monkey
+spec:
+  hosts:
+    - {{ .Values.istio.gatewayHost | quote }}
+  gateways:
+    - chaos-monkey
+  http:
+    - match:
+        - uri:
+            prefix: /api/v1/carts
+      route:
+        - destination:
+            host: cart-service
+            port:
+              number: 8080
+    - match:
+        - uri:
+            prefix: /api/v1/checkouts
+      route:
+        - destination:
+            host: checkout-service
+            port:
+              number: 8080
+    - match:
+        - uri:
+            prefix: /api/v1/catalog
+        - uri:
+            prefix: /api/v1/stock
+        - uri:
+            prefix: /api/v1/demo
+      route:
+        - destination:
+            host: inventory-service
+            port:
+              number: 8080
+    - match:
+        - uri:
+            prefix: /
+      route:
+        - destination:
+            host: storefront
+            port:
+              number: 80
+{{- end }}

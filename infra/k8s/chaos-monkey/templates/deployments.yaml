@@ -1,0 +1,64 @@
+{{- range $name, $app := .Values.apps }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ $name }}
+  labels:
+    app: {{ $name }}
+    version: v1
+spec:
+  replicas: {{ $app.replicas }}
+  selector:
+    matchLabels:
+      app: {{ $name }}
+  template:
+    metadata:
+      labels:
+        app: {{ $name }}
+        version: v1
+        {{- if $app.chaosTarget }}
+        chaos-target: "true"
+        {{- end }}
+    spec:
+      containers:
+        - name: {{ $name }}
+          image: {{ $app.image }}
+          imagePullPolicy: {{ $.Values.imagePullPolicy | default "IfNotPresent" }}
+          ports:
+            - containerPort: {{ $app.port }}
+          {{- if eq $name "storefront" }}
+          livenessProbe:
+            httpGet:
+              path: /
+              port: {{ $app.port }}
+          readinessProbe:
+            httpGet:
+              path: /
+              port: {{ $app.port }}
+          {{- else }}
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: {{ $app.port }}
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: {{ $app.port }}
+          {{- end }}
+          {{- if eq $name "cart-service" }}
+          env:
+            - name: REDIS_URL
+              value: redis://redis:6379
+          {{- end }}
+          {{- if eq $name "inventory-service" }}
+          env:
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-credentials
+                  key: DATABASE_URL
+          {{- end }}
+          resources:
+            {{- toYaml $.Values.resources | nindent 12 }}
+{{- end }}
