@@ -1,0 +1,64 @@
+name: CI
+
+# Pre-merge gate. Runs on every PR into master and on pushes to master
+# itself (so a direct push can't slip past the same checks a PR would face).
+on:
+  pull_request:
+    branches: [master]
+  push:
+    branches: [master]
+
+# A newer push to the same branch cancels the older, still-running check —
+# no point spending runners on a commit that's already been superseded.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # One job, run once per JS project. Each project defines what typecheck /
+  # test / build mean in its own package.json; CI only calls the script names,
+  # so adding a project here is a one-line matrix entry, not new CI logic.
+  node:
+    name: node (${{ matrix.dir }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        dir:
+          - apps/storefront
+          - services/cart-service
+          - services/checkout-service
+    defaults:
+      run:
+        working-directory: ${{ matrix.dir }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: ${{ matrix.dir }}/package-lock.json
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm run test
+      - run: npm run build
+
+  # Python service: lint with ruff, then pytest. Installed as an editable
+  # package with its dev extras so the test deps come straight from the
+  # pyproject that ships with the service.
+  python:
+    name: python (inventory-service)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: services/inventory-service
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: services/inventory-service/pyproject.toml
+      - run: pip install -e ".[dev]"
+      - run: ruff check .
+      - run: pytest
