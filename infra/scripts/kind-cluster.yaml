@@ -1,0 +1,15 @@
+# Multi-node kind cluster: one control-plane, two workers.
+#
+# Two workers exist so pod-kill chaos is topology-faithful locally. With inventory
+# at minReplicas 2, the scheduler spreads the replicas across separate nodes, so
+# killing one exercises cross-node rescheduling instead of restarting on the same
+# box — which is the behaviour the resilience demo claims to show.
+#
+# The node image is passed by kind-up.sh via --image so the version stays pinned
+# in exactly one place.
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+nodes:
+  - role: control-plane
+  - role: worker
+  - role: worker
