@@ -1,6 +1,6 @@
 # ADR-0003: Ephemeral AKS for the demo, kind for local development
 
-**Status:** Accepted — 2026-07-14
+**Status:** Accepted — 2026-07-14 · Refined by [ADR-0005](0005-catalog-static-seed-interim.md) (Catalog seed served from a static file until Inventory gains a datastore)
 
 ## Context
 
