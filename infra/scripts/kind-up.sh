@@ -5,11 +5,12 @@ set -euo pipefail
 
 CLUSTER_NAME="${CLUSTER_NAME:-chaos-monkey}"
 NODE_IMAGE="${NODE_IMAGE:-kindest/node:v1.36.1}"
+CLUSTER_CONFIG="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/kind-cluster.yaml"
 
 if kind get clusters | grep -qx "${CLUSTER_NAME}"; then
   echo "kind cluster '${CLUSTER_NAME}' already exists — skipping create"
 else
-  kind create cluster --name "${CLUSTER_NAME}" --image "${NODE_IMAGE}"
+  kind create cluster --name "${CLUSTER_NAME}" --image "${NODE_IMAGE}" --config "${CLUSTER_CONFIG}"
 fi
 
 kubectl create namespace chaos-monkey --dry-run=client -o yaml | kubectl apply -f -
