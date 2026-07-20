@@ -65,3 +65,6 @@ temp/
 
 # Personal interview-prep notes — not part of the project
 interview-prep/
+
+# Personal study notes (teach-me / defend)
+.study/
